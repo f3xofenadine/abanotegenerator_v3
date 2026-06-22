@@ -1,0 +1,8 @@
+{
+  "name": "ABA Session Note Generator",
+  "description": "Professional session narrative generator for Applied Behavior Analysis (ABA). Streamline clinical documentation with AI-powered narrative drafting.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
