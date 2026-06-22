@@ -26,7 +26,6 @@ export interface ABAFormSessionData {
 
   // Additional
   additionalDetails: string;
-  sentenceCount: number;
 }
 
 export interface GenerateResponse {

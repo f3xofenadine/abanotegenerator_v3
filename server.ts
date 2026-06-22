@@ -1,7 +1,7 @@
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
-import { GoogleGenAI, ThinkingLevel } from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -64,6 +64,10 @@ const BEHAVIOR_SEVERITY_LABELS: Record<number, string> = {
   4: "Constant"
 };
 
+// In-memory model failure tracking to avoid retrying downed or over-quota models in the fallback chain.
+const modelFailures = new Map<string, number>();
+const BACKOFF_DURATION_MS = 5 * 60 * 1000; // 5 minutes backoff
+
 // API endpoint for narrative generation
 app.post("/api/generate", async (req, res) => {
   try {
@@ -87,41 +91,93 @@ app.post("/api/generate", async (req, res) => {
       ? (PARTICIPATION_LABELS[sessionData.participationLevel] || "Moderate Participation")
       : (sessionData.participationLevel || 'Moderate Participation');
     
-    let prompt = `Write a clinical ABA session narrative (~${sessionData.sentenceCount || 5} sentences).
-Role: BCBA. Term: "Client".
-Data:
-- Setting: ${sessionData.setting}
-- Emphasis: ${sessionData.sessionEmphasis?.join(', ')}
-- Participation: ${participationVal}
-- Affect: ${affectEngVal}
-- Strategies: ${sessionData.strategies?.join(', ')}
-- Prompts: ${promptRecepVal}
-- Targets: ${sessionData.teachingTargets?.join(', ')}
-- Problem Behavior: ${behaviorSevVal} (${sessionData.behaviorTypes?.join(', ') || 'None'})
-- Extra: ${sessionData.additionalDetails || 'None'}
-Rules: Objective, clinical flow, no PHI.`;
+    const targetsVal = sessionData.teachingTargets?.join(', ') || 'None';
+    const strategiesVal = sessionData.strategies?.join(', ') || 'None';
+    const behaviorTypesVal = sessionData.behaviorTypes?.join(', ') || '';
 
-    if (sessionData.history && Array.isArray(sessionData.history) && sessionData.history.length > 0) {
-      const activeHistory = sessionData.history.filter(Boolean);
-      if (activeHistory.length > 0) {
-        prompt += `\n\nCRITICAL VARIATIONAL MANDATE:
-To ensure wide clinical variety and prevent boilerplate repetition, the newly generated narrative MUST be written with completely different sentence structure, starting verbs, word choice, and phrasing styles compared to the previous two generations listed below. Do not use the same transitions or introductory phrases.
+    const systemInstruction = `You are an AI assistant specializing in Applied Behavior Analysis (ABA). Your task is to generate a professional session note suitable for clinical records and insurance review (Medicaid/Tricare). 
 
-[PREVIOUS GENERATION HISTORY - DO NOT REUSE WORD PATTERNS OR REPEAT PHRASING]:
-${activeHistory.map((item, index) => `Generation #${index + 1}: "${item}"`).join('\n\n')}`;
+CRITICAL RULES:
+1. OBJECTIVE LANGUAGE: Use behavioral observations (e.g., 'displayed frequent smiles') instead of subjective states ('happy').
+2. PRIVACY: No PHI. Describe problem behaviors in general terms ('physical aggression') not specific details ('hitting peers').
+3. NO FUNCTIONAL TALK: Do not mention FBA, ABC data, or hypotheses about functions of behavior.
+4. STEADY FLOW: The note should be between 4 and 6 sentences, approx 70 words.
+5. COMPLETE NARRATIVE: ABSOLUTE REQUIREMENT - The narrative MUST be fully grammatically complete. Do NOT truncate or cut off mid-sentence. Ensure every sentence is fully concluded with final punctuation.
+6. NO INTROS: Do not start with "During". Refer to the client as "Client".
+7. VARIETY: You must vary phrasing significantly between generations. Use different sentence structures and vocabulary for every request.
+8. OPENING VARIETY: Do NOT start consecutive narratives with the same word or phrase. If the provided history shows a note starting with "Client", the new note MUST start with a different subject or phrase (e.g., "Observation of...", "The session began...", "Engagement level...").`;
+
+    const userPrompt = `Generate a unique session note based on these details (Variation is mandatory, especially for the starting words):
+- Affect: ${affectEngVal} (${participationVal})
+- Behavior: ${behaviorSevVal}${behaviorTypesVal ? ` (${behaviorTypesVal})` : ''}
+- Targets: ${targetsVal}
+- Strategies: ${strategiesVal}
+- Receptiveness: ${promptRecepVal}
+${sessionData.setting ? `- Setting: ${sessionData.setting}` : ''}
+${sessionData.additionalDetails ? `- Extra: ${sessionData.additionalDetails}` : ''}
+
+${sessionData.history && sessionData.history.length > 0 ? `HISTORY (DO NOT REPEAT THESE SPECIFIC PHRASINGS OR OPENING SENTENCE STRUCTURES): ${[...sessionData.history].filter(Boolean).sort(() => Math.random() - 0.5).join(' | ')}` : ''}`;
+
+    const baseModels = [
+      "gemini-3.5-flash",
+      "gemini-3.1-pro-preview",
+      "gemini-3.1-flash-lite",
+      "gemini-flash-latest"
+    ];
+
+    const now = Date.now();
+    const healthyModels = [];
+    const unhealthyModels = [];
+
+    for (const modelName of baseModels) {
+      const failedAt = modelFailures.get(modelName);
+      if (failedAt && (now - failedAt < BACKOFF_DURATION_MS)) {
+        unhealthyModels.push(modelName);
+      } else {
+        healthyModels.push(modelName);
       }
     }
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
-      contents: prompt,
-      config: {
-        thinkingConfig: {
-          thinkingLevel: ThinkingLevel.LOW
-        },
-        temperature: 1.0,
+    const modelsToTry = [...healthyModels, ...unhealthyModels];
+
+    let response = null;
+    let lastError = null;
+    const attemptErrors: string[] = [];
+
+    for (const modelName of modelsToTry) {
+      try {
+        console.log(`Generating narrative using ${modelName}...`);
+        response = await ai.models.generateContent({
+          model: modelName,
+          contents: userPrompt,
+          config: {
+            systemInstruction: systemInstruction,
+            temperature: 0.9,
+            topP: 0.95,
+            topK: 64
+          }
+        });
+        
+        if (response && response.text) {
+          console.log(`Successfully generated narrative using ${modelName}`);
+          const text = response.text;
+          modelFailures.delete(modelName);
+          res.json({ narrative: text });
+          return;
+        }
+      } catch (err: any) {
+        const errorMsg = err.message || JSON.stringify(err);
+        attemptErrors.push(`${modelName}: ${errorMsg}`);
+        console.warn(`Model ${modelName} failed:`, errorMsg);
+        modelFailures.set(modelName, Date.now());
+        lastError = err;
       }
-    });
+    }
+
+    if (!response || !response.text) {
+      const combinedDetails = attemptErrors.length > 0 ? ": " + attemptErrors.join(" | ") : "";
+      throw new Error(`All model fallbacks failed${combinedDetails}`);
+    }
 
     res.json({ narrative: response.text });
   } catch (error: any) {

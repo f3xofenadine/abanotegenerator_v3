@@ -6,3 +6,63 @@
   --font-serif: "Playfair Display", ui-serif, Georgia, serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 }
+
+/* Custom range slider styling to make slider buttons/handles significantly larger */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: #1e293b; /* Slate 800 track background */
+  outline: none;
+  border-radius: 9999px;
+}
+
+/* Chrome, Safari, Opera, and Edge webkit thumb */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px; /* Super visible and easy to tap */
+  height: 24px;
+  border-radius: 9999px;
+  background: #4f46e5; /* Indigo 600 */
+  border: 2px solid #ffffff; /* Crisp white border */
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.3);
+  transition: transform 0.15s ease-on-out, background-color 0.15s ease-on-out, box-shadow 0.15s ease-on-out;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  background: #6366f1; /* Lighter Indigo 500 on hover */
+  transform: scale(1.15);
+  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.4);
+}
+
+input[type="range"]::-webkit-slider-thumb:active {
+  background: #4338ca; /* Darker Indigo 700 on drag */
+  transform: scale(1.18);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.5);
+}
+
+/* Firefox thumb */
+input[type="range"]::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  background: #4f46e5;
+  border: 2px solid #ffffff;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.3);
+  transition: transform 0.15s ease-on-out, background-color 0.15s ease-on-out, box-shadow 0.15s ease-on-out;
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+  background: #6366f1;
+  transform: scale(1.15);
+  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.4);
+}
+
+input[type="range"]::-moz-range-thumb:active {
+  background: #4338ca;
+  transform: scale(1.18);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.5);
+}
+

@@ -4,6 +4,57 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Google AI Studio App</title>
+    <script>
+      // Gracefully prevent benign HMR WebSocket/Vite connection errors from displaying in error overlays.
+      window.addEventListener('unhandledrejection', function(event) {
+        if (event.reason) {
+          const msg = (event.reason.message || String(event.reason) || '').toLowerCase();
+          if (msg.includes('websocket') || msg.includes('web socket') || msg.includes('vite') || msg.includes('connection')) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+          }
+        }
+      }, true);
+      window.addEventListener('error', function(event) {
+        const msg = (event.message || '').toLowerCase();
+        const filename = (event.filename || '').toLowerCase();
+        if (msg.includes('websocket') || msg.includes('web socket') || msg.includes('vite') || filename.includes('vite')) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        }
+      }, true);
+
+      // Overwrite console.error and console.warn to suppress benign dev socket noise
+      const rawConsoleError = console.error;
+      console.error = function(...args) {
+        const argStr = args.map(arg => {
+          try {
+            return String(arg);
+          } catch(e) {
+            return '';
+          }
+        }).join(' ').toLowerCase();
+        if (argStr.includes('websocket') || argStr.includes('web socket') || argStr.includes('vite') || argStr.includes('connection failed')) {
+          return;
+        }
+        rawConsoleError.apply(console, args);
+      };
+
+      const rawConsoleWarn = console.warn;
+      console.warn = function(...args) {
+        const argStr = args.map(arg => {
+          try {
+            return String(arg);
+          } catch(e) {
+            return '';
+          }
+        }).join(' ').toLowerCase();
+        if (argStr.includes('websocket') || argStr.includes('web socket') || argStr.includes('vite') || argStr.includes('connection failed')) {
+          return;
+        }
+        rawConsoleWarn.apply(console, args);
+      };
+    </script>
   </head>
   <body>
     <div id="root"></div>

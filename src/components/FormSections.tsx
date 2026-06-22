@@ -18,29 +18,29 @@ export const SelectionSection = ({ id, label, children, note, collapsible = fals
   const [isCollapsed, setIsCollapsed] = useState(collapsible ? defaultCollapsed : false);
 
   return (
-    <div className="bg-[#131b2e] rounded-lg border border-slate-800 shadow-md mb-4.5 overflow-hidden">
+    <div className="bg-slate-900 rounded-xl border border-slate-800 shadow-md mb-5 overflow-hidden">
       <div 
         onClick={() => {
           if (collapsible) {
             setIsCollapsed(!isCollapsed);
           }
         }}
-        className={`bg-[#1e293b]/50 px-5 sm:px-6 py-4 border-b border-slate-800 flex justify-between items-center gap-4 ${
-          collapsible ? 'cursor-pointer hover:bg-slate-700/20 transition-colors select-none' : ''
+        className={`bg-slate-900/40 px-5 sm:px-6 py-4 border-b border-slate-850 flex justify-between items-center gap-4 ${
+          collapsible ? 'cursor-pointer hover:bg-slate-800/80 transition-colors select-none' : ''
         }`}
       >
         <div className="flex items-center gap-3">
-          <h3 className="text-sm sm:text-base md:text-lg font-black uppercase tracking-wider text-slate-200">{label}</h3>
+          <h3 className="text-sm sm:text-base md:text-md font-bold tracking-tight text-slate-200">{label}</h3>
           {collapsible && (
-            <span className="text-xs sm:text-sm text-blue-400/90 font-extrabold uppercase tracking-widest bg-blue-500/10 px-2.5 py-1 rounded-full border border-blue-500/15">
+            <span className="text-xs text-indigo-400 font-semibold bg-indigo-500/10 px-2.5 py-1 rounded-full border border-indigo-500/20">
               {isCollapsed ? 'Optional' : 'Active'}
             </span>
           )}
         </div>
         <div className="flex items-center gap-3">
-          {note && <span className="text-sm text-slate-400 font-semibold hidden md:inline truncate">{note}</span>}
+          {note && <span className="text-xs sm:text-sm text-slate-400 font-semibold hidden md:inline truncate">{note}</span>}
           {collapsible && (
-            <div className="text-slate-450">
+            <div className="text-slate-400">
               {isCollapsed ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
             </div>
           )}
@@ -48,7 +48,7 @@ export const SelectionSection = ({ id, label, children, note, collapsible = fals
       </div>
       {!isCollapsed && (
         <div className="p-5 sm:p-6 flex flex-col gap-5">
-          {note && <p className="text-sm md:hidden italic text-slate-400">{note}</p>}
+          {note && <p className="text-xs md:hidden italic text-slate-400">{note}</p>}
           {children}
         </div>
       )}
@@ -85,18 +85,18 @@ export const ChipGroup = ({ label, options, selected, onChange, multiple = false
   };
 
   return (
-    <div className="flex flex-col gap-3">
-      {label && <label className="text-sm sm:text-base font-black text-slate-300 uppercase tracking-wider">{label}</label>}
-      <div className="flex flex-wrap gap-2.5">
+    <div className="flex flex-col gap-2.5">
+      {label && <label className="text-xs sm:text-sm font-semibold text-slate-400 uppercase tracking-wider">{label}</label>}
+      <div className="flex flex-wrap gap-2">
         {options.map(opt => (
           <button
             key={opt}
             type="button"
             onClick={() => handleToggle(opt)}
-            className={`px-4.5 py-2.5 sm:px-5 sm:py-3 rounded-lg text-sm sm:text-base md:text-lg font-bold transition-all border cursor-pointer duration-150 ${
+            className={`px-3.5 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all border cursor-pointer hover:scale-[1.01] active:scale-[0.98] duration-150 ${
               isSelected(opt)
-                ? 'bg-blue-600 border-blue-450 text-white shadow-lg scale-[1.02]'
-                : 'bg-[#1e293b]/40 border-slate-700/60 text-slate-200 hover:border-slate-500 hover:bg-slate-700/30 font-semibold'
+                ? 'bg-indigo-650 border-indigo-600 text-white shadow-xs font-semibold'
+                : 'bg-slate-800/50 border-slate-700/80 text-slate-350 hover:border-slate-600 hover:bg-slate-800 hover:text-white'
             }`}
           >
             {opt}
