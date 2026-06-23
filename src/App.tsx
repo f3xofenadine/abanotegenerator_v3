@@ -6,6 +6,7 @@ import React, { useState, useEffect } from 'react';
 import { ABAFormSessionData, GenerateResponse } from './types';
 import { SelectionSection, ChipGroup } from './components/FormSections';
 import { NarrativePreview } from './components/NarrativePreview';
+import { AdSensePlaceholder } from './components/AdSensePlaceholder';
 import { Sparkles, Brain, ClipboardCheck, Wand2, RotateCcw, RefreshCw, Plus, ArrowDown, Copy, Check } from 'lucide-react';
 import { motion } from 'motion/react';
 
@@ -398,6 +399,8 @@ export default function App() {
             </div>
           </SelectionSection>
 
+          <AdSensePlaceholder id="ad-above-strategies" />
+
           <SelectionSection 
             id="strategies" 
             label="ABA Strategies"
@@ -495,6 +498,8 @@ export default function App() {
               </button>
             </div>
           </SelectionSection>
+
+          <AdSensePlaceholder id="ad-above-behavior" />
 
           <SelectionSection id="behavior" label="Problem Behavior">
             <div className="flex flex-col gap-4 bg-slate-950/40 p-5 rounded-lg border border-slate-800/80 mb-5">

@@ -186,6 +186,11 @@ ${sessionData.history && sessionData.history.length > 0 ? `HISTORY (DO NOT REPEA
   }
 });
 
+app.get("/ads.txt", (req, res) => {
+  res.type("text/plain");
+  res.send("google.com, pub-6792335595485897, DIRECT, f08c47fec0942fa0");
+});
+
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
