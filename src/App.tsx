@@ -208,10 +208,10 @@ export default function App() {
                 value={formData.participationLevel}
                 onChange={e => updateField('participationLevel', parseInt(e.target.value))}
               />
-              <div className="flex justify-between text-[11px] text-slate-400 font-semibold uppercase tracking-wider px-1">
+              <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-400 font-semibold uppercase tracking-wider px-1">
                 <span>None</span>
-                <span>Minimal</span>
-                <span>Moderate</span>
+                <span><span className="hidden sm:inline">Minimal</span><span className="inline sm:hidden">Min</span></span>
+                <span><span className="hidden sm:inline">Moderate</span><span className="inline sm:hidden">Mod</span></span>
                 <span>High</span>
                 <span>Active</span>
               </div>
@@ -243,10 +243,10 @@ export default function App() {
                 value={formData.affectEngagement}
                 onChange={e => updateField('affectEngagement', parseInt(e.target.value))}
               />
-              <div className="flex justify-between text-[11px] text-slate-400 font-semibold uppercase tracking-wider px-1">
+              <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-400 font-semibold uppercase tracking-wider px-1">
                 <span>None</span>
                 <span>Low</span>
-                <span>Moderate</span>
+                <span><span className="hidden sm:inline">Moderate</span><span className="inline sm:hidden">Mod</span></span>
                 <span>High</span>
                 <span>Max</span>
               </div>
@@ -293,12 +293,12 @@ export default function App() {
                 value={formData.promptReceptiveness}
                 onChange={e => updateField('promptReceptiveness', parseInt(e.target.value))}
               />
-              <div className="flex justify-between text-[11px] text-slate-400 font-semibold uppercase tracking-wider px-1">
-                <span>Ineffective</span>
+              <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-400 font-semibold uppercase tracking-wider px-1">
+                <span><span className="hidden sm:inline">Ineffective</span><span className="inline sm:hidden">Ineff</span></span>
                 <span>Low</span>
-                <span>Moderate</span>
+                <span><span className="hidden sm:inline">Moderate</span><span className="inline sm:hidden">Mod</span></span>
                 <span>High</span>
-                <span>Effective</span>
+                <span><span className="hidden sm:inline">Effective</span><span className="inline sm:hidden">Eff</span></span>
               </div>
             </div>
           </SelectionSection>
@@ -382,12 +382,12 @@ export default function App() {
                   }
                 }}
               />
-              <div className="flex justify-between text-[11px] text-slate-400 font-semibold uppercase tracking-wider px-1">
+              <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-400 font-semibold uppercase tracking-wider px-1">
                 <span>None</span>
-                <span>Occasional</span>
-                <span>Moderate</span>
-                <span>Frequent</span>
-                <span>Constant</span>
+                <span><span className="hidden sm:inline">Occasional</span><span className="inline sm:hidden">Occ</span></span>
+                <span><span className="hidden sm:inline">Moderate</span><span className="inline sm:hidden">Mod</span></span>
+                <span><span className="hidden sm:inline">Frequent</span><span className="inline sm:hidden">Freq</span></span>
+                <span><span className="hidden sm:inline">Constant</span><span className="inline sm:hidden">Const</span></span>
               </div>
             </div>
 
