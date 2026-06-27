@@ -84,6 +84,22 @@ export default async function handler(req: any, res: any) {
     const sessionData = req.body;
     const ai = getAi();
 
+    const acronymMap: Record<string, string> = {
+      "FCT": "functional communication training",
+      "NET": "natural environment teaching",
+      "DTT": "discrete trial teaching",
+      "SIB": "self-injurious behavior",
+      "Chaining/TA": "chaining and task analysis",
+    };
+
+    const expandAcronyms = (items: string[] | undefined | null) => {
+      if (!items) return [];
+      return items.map(item => {
+        const trimmed = item.trim();
+        return acronymMap[trimmed] || acronymMap[trimmed.toUpperCase()] || item;
+      });
+    };
+
     // Map numeric sliders or fallback to original arrays/strings
     const affectEngVal = typeof sessionData.affectEngagement === 'number' 
       ? (AFFECT_LABELS[sessionData.affectEngagement] || "Moderate Engagement")
@@ -102,8 +118,8 @@ export default async function handler(req: any, res: any) {
       : (sessionData.participationLevel || 'Moderate Participation');
     
     const targetsVal = sessionData.teachingTargets?.join(', ') || 'None';
-    const strategiesVal = sessionData.strategies?.join(', ') || 'None';
-    const behaviorTypesVal = sessionData.behaviorTypes?.join(', ') || '';
+    const strategiesVal = expandAcronyms(sessionData.strategies).join(', ') || 'None';
+    const behaviorTypesVal = expandAcronyms(sessionData.behaviorTypes).join(', ') || '';
 
     const systemInstruction = `You are an AI assistant specializing in Applied Behavior Analysis (ABA). Your task is to generate a professional session note suitable for clinical records and insurance review (Medicaid/Tricare). 
 
@@ -115,7 +131,8 @@ CRITICAL RULES:
 5. COMPLETE NARRATIVE: ABSOLUTE REQUIREMENT - The narrative MUST be fully grammatically complete. Do NOT truncate or cut off mid-sentence. Ensure every sentence is fully concluded with final punctuation.
 6. NO INTROS: Do not start with "During". Refer to the client as "Client".
 7. VARIETY: You must vary phrasing significantly between generations. Use different sentence structures and vocabulary for every request.
-8. OPENING VARIETY: Do NOT start consecutive narratives with the same word or phrase. If the provided history shows a note starting with "Client", the new note MUST start with a different subject or phrase (e.g., "Observation of...", "The session began...", "Engagement level...").`;
+8. OPENING VARIETY: Do NOT start consecutive narratives with the same word or phrase. If the provided history shows a note starting with "Client", the new note MUST start with a different subject or phrase (e.g., "Observation of...", "The session began...", "Engagement level...").
+9. NO CLINICAL ACRONYMS: Never use shorthand acronyms. You MUST write out their full terms completely. For example, write "functional communication training" instead of "FCT", "natural environment teaching" instead of "NET", "discrete trial teaching" instead of "DTT", "self-injurious behavior" instead of "SIB", and "chaining and task analysis" instead of "Chaining/TA".`;
 
     const userPrompt = `Generate a unique session note based on these details (Variation is mandatory, especially for the starting words):
 - Affect: ${affectEngVal} (${participationVal})
