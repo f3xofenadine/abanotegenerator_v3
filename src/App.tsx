@@ -9,6 +9,7 @@ import { NarrativePreview } from './components/NarrativePreview';
 import { AdSensePlaceholder } from './components/AdSensePlaceholder';
 import { Sparkles, Brain, ClipboardCheck, Wand2, RotateCcw, RefreshCw, Plus, ArrowDown, Copy, Check } from 'lucide-react';
 import { motion } from 'motion/react';
+import { Analytics } from '@vercel/analytics/react';
 
 const initialData: ABAFormSessionData = {
   setting: '',
@@ -671,6 +672,7 @@ export default function App() {
           </div>
         </div>
       </div>
+      <Analytics />
     </div>
   );
 }
